@@ -1,5 +1,5 @@
 # Data Minging Homework
 - Kmeans
 - Decision Tree
-- Assiociation Rule
+- Association Rule
 - Naive Bayes
