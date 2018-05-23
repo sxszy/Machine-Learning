@@ -26,11 +26,13 @@
                 y = nums.index(num)
                 if x != y:
                     result = [x,y]
+                    break
                 elif x == y:
                     nums[x] = None
                     if remain_num in nums:
                         y = nums.index(num)
                         result = [x,y]
+                        break
                 else:
                     pass
                 
