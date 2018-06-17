@@ -63,3 +63,11 @@
 	>>> str(dict)
 	"{'google': 'google.com', 'runoob': 'runoob.com'}"
 	>>>
+
+### 5. reload()
+>reload() 用于重新载入之前载入的模块
+
+以下实例展示了reload()的使用方法：
+
+	>>>from imp import reload
+	>>>reload(...)
