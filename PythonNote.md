@@ -9,6 +9,7 @@
 	>>> list(enumerate(seasons, start=1))       # 小标从 1 开始
 	[(1, 'Spring'), (2, 'Summer'), (3, 'Fall'), (4, 'Winter')]
 如果是用来循环的话，常常可以使用
+
 	>>>seq = ['one', 'two', 'three']
 	>>> for i, element in enumerate(seq):
 	...     print i, element
