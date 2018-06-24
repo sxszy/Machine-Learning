@@ -1,4 +1,4 @@
-# 笔记整理-更新 2018/6/22
+# 笔记整理-更新 2018/6/24
 ## 日常遇到的一些python常用的一些函数或者方法，做个记录。
 ### 1. enumerate()
 >enumerate() 函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据和数据下标，一般用在 for 循环当中：
@@ -165,3 +165,98 @@ raise语法格式如下:
 	    raise Networkerror("Bad hostname")
 	except Networkerror,e:
 	    print e.args
+
+### 9. 不可变与可变-Immutable & Mutable
+
+可变（mutable)和不可变（immutable）这个问题困扰了我很久，今天决定好好地把他理解一下！
+
+>并不是所有的Python对象处理方式都是一样的，有的对象是可变的(mutable)，此类对象可以被改变，其余的对象则是不可变的(immutable)，它们无法被修改，并且当我们尝试更新此类对象的时候，会返回一个新的对象。知道这些对我们写Python代码有什么意义呢？我们来一探究竟。
+
+#### 不可变（Immutable）对象类型
++ int 
++ float
++ decimal
++ complex
++ bool
++ string
++ tuple
++ range
++ frozenset
++ bytes
+#### 可变（Mutable）对象类型
++ list
++ dict
++ set
++ bytearray
++ user-defined classed(unless specifically made immutable)
+---
+#### Case one
+
+	>>> a = 1
+	>>> id(a)
+	1518038080
+	>>> a = 2
+	>>> id(a)
+	1518038112
+	
+从这个例子我们可以看到，在赋值之后a的ID（内存地址空间）已经发生了变化，这与我们在以前所知的，地址空间不变而其中的值发生了变化的情况是不太相同的。我们可以这样理解，a = 1（= 相当于是引用）的含义是创建一个值为2的整形对象，再将a指向该对象的地址，多以上例的两个int对象的值并没有变。
+#### Case two
+
+	>>> a = [1,2,3]
+	>>> b = (1,2,3)
+	>>> a[0] = 4
+	>>> print(a)
+	[4, 2, 3]
+	>>> b[0] = 4
+	Traceback (most recent call last):
+	  File "<stdin>", line 1, in <module>
+	TypeError: 'tuple' object does not support item assignment
+	>>> b = (1,2,[3])
+	>>> b[2][0] = 4
+	>>> print(b)
+	(1, 2, [4])
+	
+从这个例子我们可以看到，我们改变了列表a中的一个值，因为list是可变的（mutable），同时我们看到在我们试图改变元组b的一个值时，就遭遇了错误，因为元组是属于不可变类型，一旦初始化则不可改变。但是我们要注意的是，元组也并不是绝对地不可变，如果元组中包含了mutable类的object,那么这个object的值是可以改变的。
+
+#### Case three
++ **immutable**
+
+	>>> def func(x):
+	...     x = 1
+	...     print(x)
+	...
+	>>> x = 2
+	>>> func(x)
+	1
+	>>> print(x)
+	2
+	
+我们可以看到，immutable类型在函数执行后，自身的值并没有发生改变，即：
+
+>传递的引用不能改变自身，只是改变了引用的指向
+
++ **mutable**
+
+	>>> def func(x):
+	...     x[0] = 4
+	...     print(x)
+	...
+	>>> x = [1]
+	>>> func(x)
+	[4]
+	>>> print(x)
+	[4]
+
+从这个例子我们可以看到，mutable类型在函数执行后，自身的值也一起发生了改变。
+
+>这里传递的引用可以引用自身的元素而改变自身。
+
+> 对Case three进行总结：
+> + 对于immutable类型，我们在函数参数传递是值传递。（对于函数内部来说，相当于在传递的时候，复制了一个一模一样的量，再对这个量进行操作）
+> + 对于mutable类型，我们在函数参数传递则是指针传递。
+
+
+
+
+
+
