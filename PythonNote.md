@@ -166,7 +166,7 @@ raise语法格式如下:
 	except Networkerror,e:
 	    print e.args
 
-### 9. 不可变与可变-Immutable & Mutable
+### 8. 不可变与可变-Immutable & Mutable
 
 可变（mutable)和不可变（immutable）这个问题困扰了我很久，今天决定好好地把他理解一下！
 
