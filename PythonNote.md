@@ -255,6 +255,17 @@ Mutable
 > + 对于immutable类型，我们在函数参数传递是值传递。（对于函数内部来说，相当于在传递的时候，复制了一个一模一样的量，再对这个量进行操作）
 > + 对于mutable类型，我们在函数参数传递则是指针传递。
 
+### 9. 获得路径的父目录  
+Pathlib
+	
+	>>> import pathlib
+	>>> print(pathlib.Path("F:\IGG\Code\music").parent.name)
+	Code
+
+
+
+
+
 
 
 
