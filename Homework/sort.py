@@ -8,30 +8,20 @@ import time
 import random
 
 
-def quick_sort(array):
-    """每次选取一个基准值，将小的放左边，大的放右边，递归地这样取，优化：随机取基准值"""
-    array = array[:]
-    if len(array) < 2:
-        return array
-    else:
-        pivot = array[0]
-        # 小于基线值的归为一类
-        less = [i for i in array[1:] if i <= pivot]
-        greater = [i for i in array[1:] if i > pivot]
-        return quick_sort(less) + [pivot] + quick_sort(greater)
-
-
 def quick_sort_improved(array):
-    """quick_sort优化版,变成随机取"""
+    """每次选取一个基准值（默认第一个），将小的放左边，大的放右边，递归地这样取，quick_sort优化版,变成随机取"""
     array = array[:]
     if len(array) < 2:
         return array
     else:
-        pivot = random.randint(0, len(array))
+        value = random.randint(0, len(array) - 1)
+        pivot = array[value]
+        new = array[:]
+        new.pop(value)
         # 小于基线值的归为一类
-        less = [i for i in array[1:] if i <= pivot]
-        greater = [i for i in array[1:] if i > pivot]
-        return quick_sort(less) + [pivot] + quick_sort(greater)
+        less = [i for i in new if i <= pivot]
+        greater = [i for i in new if i > pivot]
+        return quick_sort_improved(less) + [pivot] + quick_sort_improved(greater)
 
 
 def bubble_sort(items, comp=lambda x, y: x > y):
@@ -67,7 +57,7 @@ def bubble_sort_improved(items, comp=lambda x, y: x > y):
     return items
 
 
-def main(sort_function=bubble_sort_improved):
+def main(sort_function=quick_sort_improved):
     start = time.time()
     print(sort_function([3, 6, 2, 5, 4, 7, 7, 2, 1, 2, 6, 7]))
     end = time.time()
