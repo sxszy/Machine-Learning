@@ -4,6 +4,7 @@
 The simple implement of SRCNN
 Author: Shi Zheyang
 Date: 2020/07/09
+Reference: https://github.com/kweisamx/TensorFlow-SRCNN
 """
 from tensorflow import keras
 from tensorflow.keras import Sequential, datasets, layers, optimizers, metrics
@@ -12,18 +13,13 @@ from super_resolution.srcnn import config
 from super_resolution.srcnn.model import SRCNN
 
 import tensorflow as tf
-import numpy
-import matplotlib.pyplot as plt
-import pathlib
-import glob
-import random
 
 
 print(tf.__version__)
 
 # Load pre-process data
-model_path = os.path.join(config.checkpoint_dir, "srcnn.h5")
-if config.is_train == True:
+model_path = os.path.join(config.checkpoint_dir, "model_weight")
+if config.is_train:
     nx, ny = input_setup(config=config)
 
     data_dir = checkpoint_dir(config)
@@ -41,8 +37,19 @@ if config.is_train == True:
 
     # Train the mode
     history = model.fit(train_dataset, epochs=config.epoch)
-    model.save(model_path)
+    model.save_weights(model_path)
 else:
-    model = keras.models.load_model(model_path)
-    # Test
-    result = model.predict
+    nx, ny = input_setup(config=config)
+
+    data_dir = checkpoint_dir(config)
+
+    input_, label_ = read_data(data_dir)
+
+    model = SRCNN(config)
+    model.compile(optimizer=optimizers.Adam(config.learning_rate),
+                  loss='mse',
+                  metrics=['mae'])
+    model.load_weights(model_path)
+    result = model.predict(input_)
+    image = merge(result, [nx, ny], config.c_dim)
+    save_image(image, "result.png")

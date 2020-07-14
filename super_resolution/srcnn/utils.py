@@ -22,13 +22,17 @@ def read_image(image_path):
     """
     # OpenCV is BGR, Pillow is RGB
     image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
 
 
 def save_image(image, output_path):
-    """Save the image"""
-    cv2.imwrite(output_path, image)
+    """Save the image
+    Args:
+        image: Input image
+        output_path: The path of output image
+    """
+    cv2.imwrite(output_path, image*255)
 
 
 def checkpoint_dir(config):
@@ -50,7 +54,6 @@ def modcrop(image, scale):
         h, w, _ = image.shape
         h = round((h / scale) * scale)
         w = round((w / scale) * scale)
-        print(h, w)
         image = image[0:h, 0:w, :]
     else:
         h, w = image.shape
@@ -70,11 +73,13 @@ def preprocess_data(image_path, scale=3):
         label_: inputY after pre-process
     """
     image = read_image(image_path)
-
+    cv2.imwrite("origin.png", image)
     label_ = modcrop(image, scale)
 
-    bicbuic_img = cv2.resize(label_, None, fx=1 / scale, fy=1 / scale, interpolation=cv2.INTER_CUBIC)
+    bicbuic_img = cv2.resize(label_, None, fx=1.0 / scale, fy=1.0 / scale, interpolation=cv2.INTER_CUBIC)
     input_ = cv2.resize(bicbuic_img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+    cv2.imwrite("input.png", input_)
+
     return input_, label_
 
 
@@ -143,22 +148,21 @@ def make_sub_data(data, padding, config):
                 ny += 1
                 # Cut the image
                 sub_input = input_[x: x + config.image_size, y: y + config.image_size]  # 33 * 33
-                sub_label = label_[x + padding: x + padding + config.label_size,
-                            y + padding: y + padding + config.label_size]  # 21 * 21
+                sub_label = label_[x + padding: x + padding + config.label_size, y + padding: y + padding + config.label_size]  # 21 * 21
 
                 # Reshape subinput and sublabel
                 sub_input = sub_input.reshape([config.image_size, config.image_size, config.c_dim])
                 sub_label = sub_label.reshape([config.label_size, config.label_size, config.c_dim])
 
                 # Normalize
-                sub_input = sub_input / 255
-                sub_label = sub_label / 255
+                sub_input = sub_input / 255.0
+                sub_label = sub_label / 255.0
 
                 # Add to sequence
                 sub_input_sequence.append(sub_input)
                 sub_label_sequence.append(sub_label)
 
-                return sub_input_sequence, sub_label_sequence, nx, ny
+    return sub_input_sequence, sub_label_sequence, nx, ny
 
 
 def read_data(path):
@@ -223,11 +227,11 @@ def input_setup(config):
 
     # Make sub_input and sub_label, if is_train false more return nx, ny
     sub_input_sequence, sub_label_sequence, nx, ny = make_sub_data(data, padding, config)
-
+    print(len(sub_label_sequence))
     # Make list to numpy array. With this transform
     arrinput = np.asarray(sub_input_sequence)  # [?, 33, 33, 3]
     arrlabel = np.asarray(sub_label_sequence)  # [?, 21, 21, 3]
-
+    print("input", arrinput.shape)
     make_data_hf(arrinput, arrlabel, config)
 
     return nx, ny
