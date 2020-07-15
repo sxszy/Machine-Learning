@@ -52,13 +52,13 @@ def modcrop(image, scale):
     """
     if len(image.shape) == 3:
         h, w, _ = image.shape
-        h = round((h / scale) * scale)
-        w = round((w / scale) * scale)
+        h = (h // scale) * scale
+        w = (w // scale) * scale
         image = image[0:h, 0:w, :]
     else:
         h, w = image.shape
-        h = (h / scale) * scale
-        w = (w / scale) * scale
+        h = (h // scale) * scale
+        w = (w // scale) * scale
         image = image[0:h, 0:w]
     return image
 
@@ -73,6 +73,7 @@ def preprocess_data(image_path, scale=3):
         label_: inputY after pre-process
     """
     image = read_image(image_path)
+    print("input_size")
     cv2.imwrite("origin.png", image)
     label_ = modcrop(image, scale)
 
@@ -206,8 +207,8 @@ def merge(images, size, c_dim):
 
     img = np.zeros((h * size[0], w * size[1], c_dim))
     for idx, image in enumerate(images):
-        i = idx % size[1]
-        j = idx // size[1]
+        i = idx % size[1]  # return modulo
+        j = idx // size[1]  # return reminder
         img[j * h: j * h + h, i * w: i * w + w, :] = image
         # cv2.imshow("srimg",img)
         # cv2.waitKey(0)
@@ -223,7 +224,7 @@ def input_setup(config):
     # Load data path, if is_train False, get test data
     data = load_data(config.is_train)
 
-    padding = round(abs(config.image_size - config.label_size) / 2)
+    padding = abs(config.image_size - config.label_size) // 2
 
     # Make sub_input and sub_label, if is_train false more return nx, ny
     sub_input_sequence, sub_label_sequence, nx, ny = make_sub_data(data, padding, config)
@@ -233,5 +234,36 @@ def input_setup(config):
     arrlabel = np.asarray(sub_label_sequence)  # [?, 21, 21, 3]
     print("input", arrinput.shape)
     make_data_hf(arrinput, arrlabel, config)
-
     return nx, ny
+
+
+def compute_psnr(image1, image2):
+    """Compute psnr
+    Args:
+        image1: result image
+        image2: ground truth image
+    Returns:
+        psnr: Peak signal-to-noise ratio - PSNR = 20*log10(MAXI/sqrt(MSE))
+    """
+    diff = np.abs(image1 - image2)
+    mse = np.square(diff).mean()
+    psnr = 20*np.log10(255 / np.sqrt(mse))
+    return psnr
+
+
+def read_test_data(config):
+    """Read test data
+    Args:
+        config: Configuration of project
+    Returns:
+        arrinput: The test data
+    """
+    data = load_data(config.is_train)
+
+    test_data, test_label = preprocess_data(data[0], scale=3)
+    test_data = test_data / 255
+    test_label = test_label / 255
+    arrinput = np.asarray(test_data)
+    arrlabel = np.asarray(test_label)
+    print("bibucic psnr:", compute_psnr(image1=(arrinput * 255), image2=(arrlabel * 255)))
+    return arrinput, arrlabel

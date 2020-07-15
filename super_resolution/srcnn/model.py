@@ -13,12 +13,12 @@ import os
 
 class SRCNN(Model):
 
-    def __init__(self, config):
+    def __init__(self, config, padding):
         super(SRCNN, self).__init__()
         """Input parameter"""
-        self.conv1 = layers.Conv2D(filters=64, kernel_size=9, activation=tf.nn.relu)
-        self.conv2 = layers.Conv2D(filters=32, kernel_size=1, activation=tf.nn.relu)
-        self.conv3 = layers.Conv2D(filters=config.c_dim, kernel_size=5)
+        self.conv1 = layers.Conv2D(filters=64, padding=padding, kernel_size=9, activation=tf.nn.relu)
+        self.conv2 = layers.Conv2D(filters=32, padding=padding, kernel_size=1, activation=tf.nn.relu)
+        self.conv3 = layers.Conv2D(filters=config.c_dim, padding=padding, kernel_size=5)
 
     def call(self, x):
         x = self.conv1(x)

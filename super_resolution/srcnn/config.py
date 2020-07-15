@@ -6,7 +6,7 @@ Author: Shi Zheyang
 Date: 2020/07/10
 """
 
-epoch = 1500
+epoch = 1000
 image_size = 33
 label_size = 21
 c_dim = 3

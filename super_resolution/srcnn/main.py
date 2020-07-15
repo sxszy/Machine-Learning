@@ -30,7 +30,7 @@ if config.is_train:
     train_dataset = train_dataset.shuffle(1000).batch(32)
 
     # Build the model
-    model = SRCNN(config)
+    model = SRCNN(config, padding='valid')
     model.compile(optimizer=optimizers.Adam(config.learning_rate),
                   loss='mse',
                   metrics=['mae'])
@@ -43,13 +43,19 @@ else:
 
     data_dir = checkpoint_dir(config)
 
-    input_, label_ = read_data(data_dir)
+    # input_, label_ = read_data(data_dir)
+    test_data, test_label = read_test_data(config)
 
-    model = SRCNN(config)
+    # When testing mode, set padding = 'same', it will keep the size
+    model = SRCNN(config, padding='same')
     model.compile(optimizer=optimizers.Adam(config.learning_rate),
                   loss='mse',
                   metrics=['mae'])
     model.load_weights(model_path)
-    result = model.predict(input_)
-    image = merge(result, [nx, ny], config.c_dim)
-    save_image(image, "result.png")
+    test_data = np.expand_dims(test_data, axis=0).astype(np.float32)
+    result = model.predict(test_data)
+    # image = merge(result, [nx, ny], config.c_dim)
+    result[result > 1.0] = 1.0
+    result[result < 0.0] = 0.0
+    result = np.squeeze(result)
+    save_image(result, "result.png")
