@@ -14,7 +14,6 @@ from super_resolution.srcnn.model import SRCNN
 
 import tensorflow as tf
 
-
 print(tf.__version__)
 
 # Load pre-process data
@@ -27,7 +26,7 @@ if config.is_train:
     input_, label_ = read_data(data_dir)
 
     train_dataset = tf.data.Dataset.from_tensor_slices((input_, label_))
-    train_dataset = train_dataset.shuffle(1000).batch(32)
+    train_dataset = train_dataset.shuffle(1000).batch(256)
 
     # Build the model
     model = SRCNN(config, padding='valid')
@@ -58,4 +57,6 @@ else:
     result[result > 1.0] = 1.0
     result[result < 0.0] = 0.0
     result = np.squeeze(result)
+    print("result shape", result.shape)
+    print(compute_psnr(result*255, test_label*255))
     save_image(result, "result.png")

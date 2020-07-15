@@ -73,7 +73,6 @@ def preprocess_data(image_path, scale=3):
         label_: inputY after pre-process
     """
     image = read_image(image_path)
-    print("input_size")
     cv2.imwrite("origin.png", image)
     label_ = modcrop(image, scale)
 
@@ -265,5 +264,7 @@ def read_test_data(config):
     test_label = test_label / 255
     arrinput = np.asarray(test_data)
     arrlabel = np.asarray(test_label)
+    print("arrinput.shape", arrinput.shape)
+    print("arrlabel.shape", arrlabel.shape)
     print("bibucic psnr:", compute_psnr(image1=(arrinput * 255), image2=(arrlabel * 255)))
     return arrinput, arrlabel
