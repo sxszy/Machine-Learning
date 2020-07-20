@@ -1,3 +1,4 @@
+# https://github.com/jackfrued/Python-100-Days/blob/master/Day16-20/16-20.Python%E8%AF%AD%E8%A8%80%E8%BF%9B%E9%98%B6.md
 # 生成式语法
 prices = {
     'AAPL': 191.88,
@@ -212,10 +213,188 @@ import time
 
 输出：-2
 """
+# 把O(n2)复杂度变成O(n)
+# def main():
+#     items = list(map(int, input().split()))
+#     # overall 全局最大，partial当前最大
+#     overall = partial = items[0]
+#     for i in range(1, len(items)):
+#         # 检查当前值和子串值哪个大，如果是前者就相当于重新起算，否则就是子串长度继续变长
+#         partial = max(items[i], partial + items[i])
+#         # 看看目前局部最大和全局最大那个大，大的话就进行替换
+#         overall = max(partial, overall)
+#     print(overall)
+#
+# if __name__ == '__main__':
+#     main()
+"""
+函数和装饰器
+"""
+from functools import wraps
+def record_time(func):
+
+    @wraps(func)
+    def wrapper(*args, **kwargs): # *args表示多个无名参数，**kwargs表示关键字参数
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f'{func.__name__}: {time.time() - start}秒')
+        return result
+
+    return wrapper()
+
+@record_time
+def sleep_1():
+    time.sleep(2)
 
 
+from functools import wraps
+from threading import RLock
 
 
+def singleton(cls):
+    """线程安全的单例装饰器"""
+    instances = {}
+    locker = RLock()
+
+    @wraps(cls)
+    def wrapper(*args, **kwargs):
+        if cls not in instances:
+            with locker:
+                if cls not in instances:
+                    instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return wrapper
+
+"""
+面对对象三要素：封装、继承和多态
+"""
+# from abc import ABCMeta, abstractmethod
+#
+#
+# class Employee(metaclass=ABCMeta):
+#     """员工(抽象类)"""
+#
+#     def __init__(self, name):
+#         self.name = name
+#
+#     @abstractmethod
+#     def get_salary(self):
+#         """结算月薪(抽象方法)"""
+#         pass
+#
+#
+# class Manager(Employee):
+#     """部门经理"""
+#
+#     def get_salary(self):
+#         return 15000.0
+#
+#
+# class Programmer(Employee):
+#     """程序员"""
+#
+#     def __init__(self, name, working_hour=0):
+#         self.working_hour = working_hour
+#         super().__init__(name)
+#
+#     def get_salary(self):
+#         return 200.0 * self.working_hour
+#
+#
+# class Salesman(Employee):
+#     """销售员"""
+#
+#     def __init__(self, name, sales=0.0):
+#         self.sales = sales
+#         super().__init__(name)
+#
+#     def get_salary(self):
+#         return 1800.0 + self.sales * 0.05
+#
+#
+# class EmployeeFactory:
+#     """创建员工的工厂（工厂模式 - 通过工厂实现对象使用者和对象之间的解耦合）"""
+#
+#     @staticmethod
+#     def create(emp_type, *args, **kwargs):
+#         """创建员工"""
+#         all_emp_types = {'M': Manager, 'P': Programmer, 'S': Salesman}
+#         cls = all_emp_types[emp_type.upper()]
+#         return cls(*args, **kwargs) if cls else None
+#
+#
+# def main():
+#     """主函数"""
+#     emps = [
+#         EmployeeFactory.create('M', '曹操'),
+#         EmployeeFactory.create('P', '荀彧', 120),
+#         EmployeeFactory.create('P', '郭嘉', 85),
+#         EmployeeFactory.create('S', '典韦', 123000),
+#     ]
+#     for emp in emps:
+#         print(f'{emp.name}: {emp.get_salary():.2f}元')
+#
+#
+# if __name__ == '__main__':
+#     main()
+
+# is-a关系：继承
+# has-a关系：关联 / 聚合 / 合成
+# use-a关系：依赖
+
+# 对象复制
+"""
+异步I/O - async / await
+"""
+import asyncio
+
+
+def num_generator(m, n):
+    """指定范围的数字生成器"""
+    yield from range(m, n + 1)
+
+
+# 我们可以使用async修饰将普通函数和生成器函数包装成异步函数和异步生成器，await语法只能出现在通过async修饰的函数中，否则会报SyntaxError错误。
+async def prime_filter(m, n):
+    """素数过滤器"""
+    primes = []
+    for i in num_generator(m, n):
+        flag = True
+        for j in range(2, int(i ** 0.5 + 1)):
+            if i % j == 0:
+                flag = False
+                break
+        if flag:
+            print('Prime =>', i)
+            primes.append(i)
+        # 在协程函数中，可以通过await语法来挂起自身的协程，并等待另一个协程完成直到返回结果：
+        await asyncio.sleep(0.001)
+    return tuple(primes)
+
+
+async def square_mapper(m, n):
+    """平方映射器"""
+    squares = []
+    for i in num_generator(m, n):
+        print('Square =>', i * i)
+        squares.append(i * i)
+
+        await asyncio.sleep(0.001)
+    return squares
+
+
+def main():
+    """主函数"""
+    loop = asyncio.get_event_loop()
+    future = asyncio.gather(prime_filter(2, 100), square_mapper(1, 100))
+    future.add_done_callback(lambda x: print(x.result()))
+    loop.run_until_complete(future)
+    loop.close()
+
+
+if __name__ == '__main__':
+    main()
 
 
 
