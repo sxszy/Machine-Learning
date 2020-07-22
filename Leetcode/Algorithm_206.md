@@ -6,7 +6,6 @@
 
 	输入: 1->2->3->4->5->NULL
 	输出: 5->4->3->2->1->NULL
-
     
 具体代码：
 
@@ -34,7 +33,7 @@
 	            curr = temp
 	        # 返回prev，此时位置为最后头节点，curr为None
 	        return prev
-
+	
 **方法二，递归法,时间复杂度O(n)，空间复杂度O(n)**
 
 	# Definition for singly-linked list.
