@@ -67,3 +67,25 @@
 
 **方法二：动态规划**
 
+	class Solution:
+	    def largest1BorderedSquare(self, grid: List[List[int]]) -> int:
+	        """动态规格把每个点左边连续1的个数，和上面连续点的个数保存下来"""
+	        m = len(grid)
+	        n = len(grid[0])
+	        dp = [[[0]*2 for _ in range(n+1)] for _ in range(m+1)]
+	        # dp[i][j][0]表示该点左边的个数，dp[i][j][1]表示该点上边的个数,事先计算好dp表
+	        for i in range(1, m+1):
+	            for j in range(1, n+1):
+	                if grid[i-1][j-1] == 1:
+	                    dp[i][j][0] = 1 + dp[i][j-1][0]
+	                    dp[i][j][1] = 1 + dp[i-1][j][1]
+	        # 然后遍历
+	        res = 0
+	        for i in range(1, m+1):
+	            for j in range(1, n+1):
+	                for k in range(min(dp[i][j][0], dp[i][j][1]), 0, -1):
+	                    # 判断是否左下角顶点上边1个数>边长，且右上角顶点左边1个数>边长
+	                    if dp[i][j-k+1][1] >= k and dp[i-k+1][j][0] >= k:
+	                        res = max(res, k)
+	                        break
+	        return res**2
