@@ -17,12 +17,14 @@ from tensorflow.keras import optimizers, datasets, Sequential, layers
 tf.random.set_seed(2345)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 BATCH_SIZE = 256
-EPOCHS = 200
+EPOCHS = 30
 LEARNING_RATE = 1e-3
 NUM_CLASSES = 10
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 IMAGE_SIZE = 32
 MODEL_PATH = "../model_weight/result"
+SAVE_MODEL_DIR = "../save_model"
+SAVE_TFLITE = "../tflite_model/model.tflite"
 
 # GPU settings
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -41,15 +43,15 @@ def preprocess(x, y, augment=False):
     Returns:
         augment: If true, including augmentation. Default False.
     """
-    img_mean = tf.constant([0.4914, 0.4822, 0.4465])
-    img_std = tf.constant([0.2023, 0.1994, 0.2010])
+    # img_mean = tf.constant([0.4914, 0.4822, 0.4465])
+    # img_std = tf.constant([0.2023, 0.1994, 0.2010])
     x = tf.cast(x, dtype=tf.float32) / 255
     if augment:
         x = tf.image.random_flip_left_right(x)
         x = tf.image.random_flip_up_down(x)
         x = tf.image.random_brightness(x, max_delta=0.5)
         x = tf.image.random_crop(x, size=[IMAGE_SIZE, IMAGE_SIZE, 3])
-    x = (x - img_mean) / img_std
+    # x = (x - img_mean) / img_std
     y = tf.cast(y, dtype=tf.int32)
     return x, y
 
@@ -81,7 +83,8 @@ model.summary()
 # Define optimizer and loss
 optimizer = optimizers.Adam(LEARNING_RATE, decay=1e-2/EPOCHS)
 # optimizer = optimizers.SGD(LEARNING_RATE, momentum=0.9, decay=5e-4)
-loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+# loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
 
 train_loss = tf.keras.metrics.Mean(name='train_loss')
 train_accuracy = tf.keras.metrics.CategoricalAccuracy(name='train_accuracy')
@@ -219,7 +222,15 @@ def predict(model_path):
 
 if __name__ == '__main__':
     start = time.time()
-    # model = train()
+    model = train()
     print("Time: ", time.time() - start)
-    predict()
+    predict(MODEL_PATH)
+    tf.saved_model.save(model, SAVE_MODEL_DIR)
+
+    converter = tf.lite.TFLiteConverter.from_saved_model(SAVE_MODEL_DIR)
+    converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+    tflite_model = converter.convert()
+
+    with open(SAVE_TFLITE, "wb") as f:
+        f.write(tflite_model)
 

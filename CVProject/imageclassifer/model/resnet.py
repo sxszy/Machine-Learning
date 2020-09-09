@@ -63,7 +63,7 @@ class ResNet(keras.Model):
         self.layer4 = self.build_block(512, layer_dim[3], strides=2)
 
         self.gap = layers.GlobalAveragePooling2D()
-        self.fc = layers.Dense(num_classes)
+        self.fc = layers.Dense(num_classes, activation="softmax")
 
     def call(self, inputs, training=None):
         out = self.stem(inputs, training=training)
@@ -80,7 +80,8 @@ class ResNet(keras.Model):
 
         return out
 
-    def build_block(self, filter_num, blocks, strides=1):
+    @ staticmethod
+    def build_block(filter_num, blocks, strides=1):
         res_block = Sequential()
         res_block.add(BasicBlock(filter_num, strides))
 
